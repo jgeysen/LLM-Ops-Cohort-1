@@ -1,1 +1,7 @@
 ipykernel
+langchain
+openai
+wikipedia
+rank_bm25
+tiktoken
+faiss-cpu
