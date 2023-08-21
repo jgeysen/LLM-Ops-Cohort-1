@@ -1,0 +1,8 @@
+pandas==2.0.3
+requests
+scrapy
+selenium
+openai
+langchain
+faiss-cpu
+tiktoken
