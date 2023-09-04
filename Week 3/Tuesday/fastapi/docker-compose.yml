@@ -1,5 +1,16 @@
 version: '3'
 services:
+  chainlit:
+    build: ../chainlit
+    command: ["chainlit", "run", "app.py", "--port", "7860"]
+    volumes:
+      - ../chainlit:/app
+    ports:
+      - 7860:7860
+    depends_on:
+      - web
+      - redis
+      - worker
   web:
     build: .
     command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80"]
@@ -23,6 +34,8 @@ services:
       - .:/app
     depends_on:
       - redis
+    environment:
+      HUGGINGFACE_TOKEN: ""
     deploy:
       resources:
         reservations:
