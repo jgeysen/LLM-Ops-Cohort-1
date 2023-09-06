@@ -4,15 +4,20 @@ services:
     build: ../chainlit
     command: ["chainlit", "run", "app.py", "--port", "7860"]
     volumes:
-      - ../chainlit:/app
+      - ../chainlit/app.py:/home/user/app/app.py
     ports:
       - 7860:7860
     depends_on:
       - web
       - redis
       - worker
+    environment:
+      OPENAI_API_KEY:
+    networks:
+      - my-network
   web:
     build: .
+    container_name: fastapi
     command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80"]
     volumes:
       - .:/app
@@ -27,6 +32,8 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+    networks:
+      - my-network
   worker:
     build: .
     command: celery -A celery_worker worker -P solo --loglevel=info
@@ -35,7 +42,7 @@ services:
     depends_on:
       - redis
     environment:
-      HUGGINGFACE_TOKEN: ""
+      HUGGINGFACE_TOKEN:
     deploy:
       resources:
         reservations:
@@ -43,7 +50,15 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+    networks:
+      - my-network
   redis:
     image: "redis:alpine"
     ports:
       - 6379:6379
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge

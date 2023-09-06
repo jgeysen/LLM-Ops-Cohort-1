@@ -9,24 +9,21 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-import os
+import requests
 import arxiv
 import chainlit as cl
-from chainlit import user_session
 
 from typing import Any, List, Mapping, Optional
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.llms.base import LLM
 
-
-import http.client
 import json
 import time
 
-API_HOST = "localhost"
-API_PORT = 8000
+API_HOST = "fastapi"
+API_PORT = 80
 
-@cl.langchain_factory(use_async=True)
+@cl.langchain_factory(use_async=False)
 async def init():
     arxiv_query = None
 
@@ -148,20 +145,14 @@ class CustomLLM(LLM):
 
 
 def generate_text(prompt):
-    conn = http.client.HTTPConnection(API_HOST, API_PORT)
     headers = {"Content-type": "application/json"}
     data = {"prompt": prompt}
     json_data = json.dumps(data)
-    conn.request("POST", "/generateText/", json_data, headers)
-    response = conn.getresponse()
-    result = json.loads(response.read().decode())
-    conn.close()
+    response = requests.post("http://fastapi:80/generateText/", json_data, headers)
+    result = response.json()
     return result["task_id"]
 
 def get_task_status(task_id):
-    conn = http.client.HTTPConnection(API_HOST, API_PORT)
-    conn.request("GET", f"/generateTextTask/{task_id}")
-    response = conn.getresponse()
-    status = response.read().decode()
-    conn.close()
+    response = requests.get(f"http://fastapi:80/task/{task_id}")
+    status = response.json()
     return status
