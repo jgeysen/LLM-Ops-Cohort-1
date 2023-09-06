@@ -1,0 +1,7 @@
+ipykernel
+jupyterlab
+llama-index 
+pypdf 
+sentence-transformers 
+ragas 
+openai
